@@ -1,0 +1,37 @@
+#! /usr/bin/tcsh -f
+
+#
+# gzap
+#
+# Copyright (c) 2018 Robert J. Hilderman.
+# All Rights Reserved.
+#
+
+set ps_output = "`ps -u $user`"
+@ i = 2
+
+while ( $i <= $#ps_output )
+    set line = ( $ps_output[$i] )
+    if ( $line[4] == "general" || $line[4] == "environment" ) then
+        set line = ( $ps_output[$i] )
+        set process_no = $line[1]
+        kill -9 $process_no
+    endif
+    @ i ++
+end
+
+set ps_output = "`ipcs -m -c`"
+@ i = 3
+
+if ( $#ps_output > 2 ) then
+    while ( $i <= $#ps_output )
+        set line = ( $ps_output[$i] )
+        if ( $line[3] == $user ) then
+            set shmid = $line[1]
+            ipcrm -m $shmid
+        endif
+        @ i ++
+    end
+endif
+
+exit 0
